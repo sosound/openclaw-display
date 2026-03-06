@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文档详情 - 展示系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style-v2.css') }}">
+    <style>
+        .doc-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .doc-header {
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #667eea;
+        }
+        .doc-title {
+            font-size: 1.8rem;
+            color: #fff;
+            margin-bottom: 1rem;
+        }
+        .doc-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9rem;
+        }
+        .doc-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .doc-content {
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            padding: 2rem;
+            line-height: 1.8;
+            color: rgba(255,255,255,0.9);
+            white-space: pre-wrap;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.95rem;
+            overflow-x: auto;
+        }
+        .doc-content h1, .doc-content h2, .doc-content h3 {
+            color: #667eea;
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+        }
+        .doc-content h1 { font-size: 1.6rem; }
+        .doc-content h2 { font-size: 1.4rem; }
+        .doc-content h3 { font-size: 1.2rem; }
+        .doc-content ul, .doc-content ol {
+            padding-left: 1.5rem;
+            margin: 1rem 0;
+        }
+        .doc-content li {
+            margin: 0.5rem 0;
+        }
+        .doc-content code {
+            background: rgba(102, 126, 234, 0.2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        .doc-content pre {
+            background: rgba(0,0,0,0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .doc-content pre code {
+            background: transparent;
+            padding: 0;
+        }
+        .doc-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: rgba(255,255,255,0.7);
+        }
+        .doc-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        .doc-content th, .doc-content td {
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 0.8rem;
+            text-align: left;
+        }
+        .doc-content th {
+            background: rgba(102, 126, 234, 0.2);
+        }
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        .back-btn:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+        .tags {
+            display: inline-block;
+            background: rgba(102, 126, 234, 0.2);
+            color: #667eea;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📄 文档详情</h1>
+            <p>展示系统 - 文档中心</p>
+        </header>
+        
+        <nav class="breadcrumb">
+            <a href="/">🏠 系统状态</a> &gt; 
+            <a href="/docs">📄 文档中心</a> &gt; 
+            <span id="breadcrumb-doc">加载中...</span>
+        </nav>
+        
+        <div class="doc-container">
+            <a href="/docs" class="back-btn">← 返回文档列表</a>
+            
+            <div id="doc-container">
+                <div class="loading"><div class="spinner"></div><p>加载文档内容...</p></div>
+            </div>
+        </div>
+        
+        <footer style="text-align: center; color: rgba(255,255,255,0.5); padding: 1rem; margin-top: 2rem;">
+            <p id="last-updated">最后更新：--</p>
+        </footer>
+    </div>
+    
+    <script>
+        const category = '{{ category }}';
+        const name = '{{ name }}';
+        
+        async function loadDoc() {
+            const container = document.getElementById('doc-container');
+            const breadcrumb = document.getElementById('breadcrumb-doc');
+            const lastUpdated = document.getElementById('last-updated');
+            
+            try {
+                const response = await fetch(`/api/docs/${category}/${name}`);
+                
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error('文档不存在');
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const doc = await response.json();
+                
+                if (doc.error) {
+                    throw new Error(doc.error);
+                }
+                
+                // 更新面包屑
+                breadcrumb.textContent = doc.title;
+                
+                // 渲染文档
+                const metaTags = doc.metadata.tags ? `<span class="tags">${doc.metadata.tags}</span>` : '';
+                const creator = doc.metadata.creator ? `<span>👤 ${doc.metadata.creator}</span>` : '';
+                const createdAt = doc.metadata.created_at ? `<span>📅 ${doc.metadata.created_at}</span>` : '';
+                const updatedAt = doc.metadata.updated_at ? `<span>🕐 ${doc.metadata.updated_at}</span>` : '';
+                
+                let html = `
+                    <div class="doc-header">
+                        <h1 class="doc-title">📄 ${doc.title}</h1>
+                        <div class="doc-meta">
+                            ${creator}
+                            ${createdAt}
+                            ${updatedAt}
+                            ${metaTags}
+                        </div>
+                    </div>
+                    <div class="doc-content">${formatContent(doc.body)}</div>
+                `;
+                
+                container.innerHTML = html;
+                lastUpdated.textContent = `最后更新：${new Date().toLocaleString('zh-CN')}`;
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="error-state">
+                        <h2>❌ 加载失败</h2>
+                        <p>${error.message}</p>
+                        <a href="/docs" class="back-btn" style="margin-top: 1rem;">← 返回文档列表</a>
+                    </div>
+                `;
+            }
+        }
+        
+        // 简单的 Markdown 格式化
+        function formatContent(text) {
+            if (!text) return '';
+            
+            // 转义 HTML
+            let formatted = text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+            
+            // 代码块
+            formatted = formatted.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+            
+            // 行内代码
+            formatted = formatted.replace(/`([^`]+)`/g, '<code>$1</code>');
+            
+            // 标题
+            formatted = formatted.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+            formatted = formatted.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+            formatted = formatted.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+            
+            // 粗体
+            formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+            
+            // 斜体
+            formatted = formatted.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+            
+            // 链接
+            formatted = formatted.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+            
+            // 列表
+            formatted = formatted.replace(/^\- (.*$)/gim, '<li>$1</li>');
+            formatted = formatted.replace(/^\d+\. (.*$)/gim, '<li>$1</li>');
+            
+            // 引用
+            formatted = formatted.replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>');
+            
+            // 换行
+            formatted = formatted.replace(/\n/g, '<br>');
+            
+            // 清理多余的 <br>
+            formatted = formatted.replace(/<\/(h[1-6]|li|blockquote)><br>/g, '</$1>');
+            
+            return formatted;
+        }
+        
+        document.addEventListener('DOMContentLoaded', loadDoc);
+    </script>
+</body>
+</html>

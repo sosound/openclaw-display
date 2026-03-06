@@ -311,6 +311,12 @@ def docs():
     logger.info("访问文档中心页面")
     return render_template('docs.html')
 
+@app.route('/docs/<category>/<name>')
+def doc_detail(category, name):
+    """文档详情页面"""
+    logger.info(f"访问文档详情：{category}/{name}")
+    return render_template('doc-detail.html', category=category, name=name)
+
 @app.route('/diary')
 def diary():
     """日记系统页面"""
@@ -364,6 +370,55 @@ def api_status():
 def api_docs():
     """API: 获取文档索引"""
     return jsonify(get_docs_index())
+
+@app.route('/api/docs/<category>/<name>')
+def api_doc_detail(category, name):
+    """API: 获取单个文档内容"""
+    try:
+        doc_path = DOCS_DIR / category / f"{name}.md"
+        if not doc_path.exists():
+            return jsonify({"error": "文档不存在"}), 404
+        
+        content = doc_path.read_text(encoding='utf-8')
+        
+        # 解析文档元数据
+        metadata = {
+            'name': name,
+            'category': category,
+            'path': str(doc_path),
+            'updated_at': datetime.fromtimestamp(doc_path.stat().st_mtime).strftime("%Y-%m-%d %H:%M:%S")
+        }
+        
+        # 提取标题和元数据块
+        lines = content.split('\n')
+        title = name
+        body_start = 0
+        
+        for i, line in enumerate(lines[:30]):
+            if line.startswith('# '):
+                title = line[2:].strip()
+            elif line.startswith('- **创建者**:'):
+                metadata['creator'] = line.replace('- **创建者**:', '').strip()
+            elif line.startswith('- **创建时间**:'):
+                metadata['created_at'] = line.replace('- **创建时间**:', '').strip()
+            elif line.startswith('- **标签**:'):
+                metadata['tags'] = line.replace('- **标签**:', '').strip()
+            elif line.startswith('---') and i > 0:
+                body_start = i + 1
+                break
+        
+        # 提取正文（跳过元数据块）
+        body = '\n'.join(lines[body_start:]).strip()
+        
+        return jsonify({
+            'title': title,
+            'content': content,
+            'body': body,
+            'metadata': metadata
+        })
+    except Exception as e:
+        logger.error(f"读取文档失败 {category}/{name}: {e}")
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/health')
 def api_health():

@@ -4,7 +4,63 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Show Galaxy - 文档中心</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style-v2.css') }}">
+    <style>
+        .doc-item-link {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            margin-bottom: 1rem;
+        }
+        .doc-item-link:hover .doc-item {
+            background: rgba(102, 126, 234, 0.15);
+            transform: translateX(5px);
+            border-left-color: #818cf8;
+        }
+        .doc-item {
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 1.2rem;
+            border-left: 3px solid #667eea;
+            transition: all 0.3s ease;
+        }
+        .doc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.8rem;
+        }
+        .doc-header h3 {
+            color: #fff;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        .doc-updated {
+            color: rgba(255,255,255,0.5);
+            font-size: 0.85rem;
+        }
+        .doc-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.6);
+        }
+        .doc-path {
+            color: rgba(255,255,255,0.4);
+            font-size: 0.8rem;
+            font-family: monospace;
+        }
+        .tags {
+            display: inline-block;
+            background: rgba(102, 126, 234, 0.2);
+            color: #818cf8;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -61,18 +117,20 @@
                         const createdAt = doc.created_at ? `<span class="meta">📅 ${doc.created_at}</span>` : '';
                         
                         html += `
-                            <div class="doc-item">
-                                <div class="doc-header">
-                                    <h3>📄 ${doc.title}</h3>
-                                    <span class="doc-updated">🕐 ${doc.updated_at}</span>
+                            <a href="/docs/${category.category}/${doc.name}" class="doc-item-link">
+                                <div class="doc-item">
+                                    <div class="doc-header">
+                                        <h3>📄 ${doc.title}</h3>
+                                        <span class="doc-updated">🕐 ${doc.updated_at}</span>
+                                    </div>
+                                    <div class="doc-meta">
+                                        ${creator}
+                                        ${createdAt}
+                                        ${tags}
+                                    </div>
+                                    <div class="doc-path">📂 /docs/${category.category}/${doc.name}.md</div>
                                 </div>
-                                <div class="doc-meta">
-                                    ${creator}
-                                    ${createdAt}
-                                    ${tags}
-                                </div>
-                                <div class="doc-path">📂 /docs/${category.category}/${doc.name}.md</div>
-                            </div>
+                            </a>
                         `;
                     });
                     
