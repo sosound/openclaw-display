@@ -6,6 +6,7 @@ Show Galaxy - 文档与展示中心
 
 from flask import Flask, render_template, jsonify
 import os
+import sys
 import subprocess
 from datetime import datetime
 import logging
@@ -19,6 +20,8 @@ WORKSPACE = Path('/root/.openclaw/workspace')
 SHOW_DIR = WORKSPACE / 'show'
 DOCS_DIR = SHOW_DIR / 'docs'
 IMAGES_DIR = SHOW_DIR / 'images'
+TEMPLATES_DIR = SHOW_DIR / 'templates'
+STATIC_DIR = SHOW_DIR / 'static'
 
 # 配置日志
 logging.basicConfig(
@@ -26,6 +29,49 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+# ==================== 启动自检 ====================
+
+def validate_startup():
+    """启动时验证必需文件和目录"""
+    logger.info("🔍 启动自检中...")
+    
+    required_dirs = [
+        (TEMPLATES_DIR, "模板目录"),
+        (STATIC_DIR, "静态资源目录"),
+        (DOCS_DIR, "文档目录"),
+    ]
+    
+    required_files = [
+        (TEMPLATES_DIR / 'index.html', "主页模板"),
+        (TEMPLATES_DIR / 'docs.html', "文档中心模板"),
+        (STATIC_DIR / 'css' / 'style-v2.css', "样式文件"),
+    ]
+    
+    all_ok = True
+    
+    # 检查目录
+    for path, desc in required_dirs:
+        if not path.exists():
+            logger.error(f"❌ 必需目录缺失：{desc} ({path})")
+            all_ok = False
+        else:
+            logger.info(f"✓ {desc}: {path}")
+    
+    # 检查文件
+    for path, desc in required_files:
+        if not path.exists():
+            logger.error(f"❌ 必需文件缺失：{desc} ({path})")
+            all_ok = False
+        else:
+            logger.info(f"✓ {desc}: {path}")
+    
+    if not all_ok:
+        logger.error("启动自检失败，请检查缺失的文件/目录")
+        sys.exit(1)
+    
+    logger.info("✅ 启动自检通过")
+    return True
 
 # ==================== 简单缓存实现 ====================
 
@@ -273,11 +319,38 @@ def api_docs():
 
 @app.route('/api/health')
 def api_health():
-    """API: 健康检查"""
-    return jsonify({"status": "healthy", "timestamp": datetime.now().isoformat()})
+    """API: 深度健康检查"""
+    checks = {
+        'templates_dir': TEMPLATES_DIR.exists(),
+        'static_dir': STATIC_DIR.exists(),
+        'docs_dir': DOCS_DIR.exists(),
+        'index_template': (TEMPLATES_DIR / 'index.html').exists(),
+        'docs_template': (TEMPLATES_DIR / 'docs.html').exists(),
+        'css_file': (STATIC_DIR / 'css' / 'style-v2.css').exists(),
+    }
+    all_ok = all(checks.values())
+    
+    status_code = 200 if all_ok else 503
+    status_text = 'healthy' if all_ok else 'unhealthy'
+    
+    logger.info(f"健康检查：{status_text} (checks={sum(checks.values())}/{len(checks)})")
+    
+    return jsonify({
+        'status': status_text,
+        'checks': checks,
+        'timestamp': datetime.now().isoformat()
+    }), status_code
 
 # ==================== 应用入口 ====================
 
 if __name__ == '__main__':
-    logger.info(f"启动 Show Galaxy 应用 on 0.0.0.0:5001")
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    # 启动自检
+    validate_startup()
+    
+    logger.info(f"🚀 启动 Show Galaxy 应用 on 0.0.0.0:5001")
+    logger.info(f"工作目录：{SHOW_DIR}")
+    logger.info(f"模板目录：{TEMPLATES_DIR}")
+    logger.info(f"静态资源：{STATIC_DIR}")
+    logger.info(f"文档目录：{DOCS_DIR}")
+    
+    app.run(host='0.0.0.0', port=5001, debug=False)
