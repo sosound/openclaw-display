@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-Show Galaxy - 文档与展示中心
+通知系统 (Notify System) - 原 Show Galaxy
+文档与展示中心 + 通知推送
 展示：图片集 + 系统状态 + 文档中心（子代理文档）
 """
 
@@ -17,11 +18,11 @@ app = Flask(__name__)
 
 # 配置
 WORKSPACE = Path('/root/.openclaw/workspace')
-SHOW_DIR = WORKSPACE / 'show'
-DOCS_DIR = SHOW_DIR / 'docs'
-IMAGES_DIR = SHOW_DIR / 'images'
-TEMPLATES_DIR = SHOW_DIR / 'templates'
-STATIC_DIR = SHOW_DIR / 'static'
+NOTIFY_DIR = WORKSPACE / 'notify'
+DOCS_DIR = NOTIFY_DIR / 'docs'
+IMAGES_DIR = NOTIFY_DIR / 'images'
+TEMPLATES_DIR = NOTIFY_DIR / 'templates'
+STATIC_DIR = NOTIFY_DIR / 'static'
 
 # 配置日志
 logging.basicConfig(
@@ -347,8 +348,8 @@ if __name__ == '__main__':
     # 启动自检
     validate_startup()
     
-    logger.info(f"🚀 启动 Show Galaxy 应用 on 0.0.0.0:5001")
-    logger.info(f"工作目录：{SHOW_DIR}")
+    logger.info(f"🚀 启动通知系统 on 0.0.0.0:5001")
+    logger.info(f"工作目录：{NOTIFY_DIR}")
     logger.info(f"模板目录：{TEMPLATES_DIR}")
     logger.info(f"静态资源：{STATIC_DIR}")
     logger.info(f"文档目录：{DOCS_DIR}")

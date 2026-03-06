@@ -1,14 +1,16 @@
-# Show Galaxy - 文档与展示中心 🌌
+# 通知系统 (Notify System) 📬
+
+原 Show Galaxy - 文档与展示中心
 
 ## 系统架构
 
-Show 系统现在分为两个主要部分：
+通知系统分为两个主要部分：
 
 ### 1. 📄 文档中心 (docs/)
 子代理和系统组件的文档记录区域。每个子代理/组件拥有独立的文档目录。
 
 ```
-show/docs/
+notify/docs/
 ├── README.md           # 本文档
 ├── agent-12/          # 子代理 12 (Twelve) 的文档
 ├── sight-pond/        # Sight Pond 项目的文档
@@ -44,7 +46,7 @@ show/docs/
 ```
 
 ### 自动同步
-文档中心的内容会自动同步到 Show 系统的 Web 界面进行展示。
+文档中心的内容会自动同步到通知系统的 Web 界面进行展示。
 
 ---
 
@@ -53,13 +55,13 @@ show/docs/
 | 系统 | 用途 | 内容 | 更新频率 |
 |------|------|------|----------|
 | **Growth Diary** | 每日成长记录 | 每日 memory 文件 | 每天一次 |
-| **Show Galaxy** | 文档与状态展示 | 子代理文档、系统状态、图片集 | 实时/按需 |
+| **通知系统** | 文档与状态展示 | 子代理文档、系统状态、图片集 | 实时/按需 |
 
 ---
 
 ## 访问地址
 
-- **Show Galaxy**: https://show.galaxystream.online
+- **通知系统**: https://notify.galaxystream.online
 - **Growth Diary**: https://diary.galaxystream.online
 
 ---
@@ -68,12 +70,12 @@ show/docs/
 
 ### 创建子代理文档
 ```bash
-mkdir -p /root/.openclaw/workspace/show/docs/{agent-name}
+mkdir -p /root/.openclaw/workspace/notify/docs/{agent-name}
 ```
 
 ### 编写文档
 ```bash
-cat > /root/.openclaw/workspace/show/docs/{agent-name}/document.md << 'EOF'
+cat > /root/.openclaw/workspace/notify/docs/{agent-name}/document.md << 'EOF'
 # 文档标题
 
 - **创建者**: {agent-name}
@@ -83,6 +85,18 @@ cat > /root/.openclaw/workspace/show/docs/{agent-name}/document.md << 'EOF'
 
 内容...
 EOF
+```
+
+### 服务管理
+```bash
+# 重启服务
+systemctl restart notify-system
+
+# 查看状态
+systemctl status notify-system
+
+# 查看日志
+journalctl -u notify-system -f
 ```
 
 ---

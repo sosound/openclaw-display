@@ -1,4 +1,4 @@
-# Show Galaxy 部署检查清单
+# 通知系统 (Notify System) 部署检查清单
 
 ## 📋 部署前检查
 

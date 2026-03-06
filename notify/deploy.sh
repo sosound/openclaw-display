@@ -7,7 +7,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SERVICE_NAME="show-galaxy"
+SERVICE_NAME="notify-system"
 PORT=5001
 LOG_FILE="/tmp/show-galaxy-deploy.log"
 
