@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-通知系统 (Notify System) - 原 Show Galaxy
-文档与展示中心 + 通知推送
-展示：图片集 + 系统状态 + 文档中心（子代理文档）
+展示系统 (Display System) - 原 Show Galaxy
+文档与展示中心 + 日记集成
+展示：图片集 + 系统状态 + 文档中心 + 日记系统（子代理文档）
 """
 
 from flask import Flask, render_template, jsonify
@@ -18,11 +18,13 @@ app = Flask(__name__)
 
 # 配置
 WORKSPACE = Path('/root/.openclaw/workspace')
-NOTIFY_DIR = WORKSPACE / 'notify'
-DOCS_DIR = NOTIFY_DIR / 'docs'
-IMAGES_DIR = NOTIFY_DIR / 'images'
-TEMPLATES_DIR = NOTIFY_DIR / 'templates'
-STATIC_DIR = NOTIFY_DIR / 'static'
+DISPLAY_DIR = WORKSPACE / 'display'
+DOCS_DIR = DISPLAY_DIR / 'docs'
+IMAGES_DIR = DISPLAY_DIR / 'images'
+TEMPLATES_DIR = DISPLAY_DIR / 'templates'
+STATIC_DIR = DISPLAY_DIR / 'static'
+DIARY_DIR = WORKSPACE / 'growth-diary'
+MEMORY_DIR = WORKSPACE / 'memory'
 
 # 配置日志
 logging.basicConfig(
@@ -157,6 +159,36 @@ def get_service_status():
     cache.set('service_status', services, CACHE_TTL)
     return services
 
+def get_diary_entries():
+    """获取日记系统条目（仅每日记录）"""
+    entries = []
+    
+    if not MEMORY_DIR.exists():
+        return entries
+    
+    import re
+    date_pattern = re.compile(r'^\d{4}-\d{2}-\d{2}$')
+    
+    for file in sorted(MEMORY_DIR.glob('*.md')):
+        if not date_pattern.match(file.stem):
+            continue
+        
+        try:
+            date_str = file.stem
+            content = file.read_text(encoding='utf-8')
+            entries.append({
+                'id': date_str,
+                'date': date_str,
+                'title': f"日记 {date_str}",
+                'content': content[:500] + '...' if len(content) > 500 else content,
+                'full_path': str(file)
+            })
+        except Exception as e:
+            logger.error(f"读取日记失败 {file}: {e}")
+    
+    entries.sort(key=lambda x: x['date'], reverse=True)
+    return entries[:10]  # 只返回最近 10 条
+
 def get_docs_index():
     """获取文档中心索引"""
     docs = []
@@ -279,6 +311,17 @@ def docs():
     logger.info("访问文档中心页面")
     return render_template('docs.html')
 
+@app.route('/diary')
+def diary():
+    """日记系统页面"""
+    logger.info("访问日记系统页面")
+    return render_template('diary.html')
+
+@app.route('/api/diary')
+def api_diary():
+    """API: 获取日记条目"""
+    return jsonify(get_diary_entries())
+
 @app.route('/api/status')
 def api_status():
     """API: 获取完整系统状态"""
@@ -304,6 +347,7 @@ def api_status():
             "services": services,
             "health_summary": health_summary,
             "docs": get_docs_index(),
+            "diary": get_diary_entries(),
             "ssl": get_ssl_status(),
             "images": get_images(),
             "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -327,6 +371,7 @@ def api_health():
         'docs_dir': DOCS_DIR.exists(),
         'index_template': (TEMPLATES_DIR / 'index.html').exists(),
         'docs_template': (TEMPLATES_DIR / 'docs.html').exists(),
+        'diary_template': (TEMPLATES_DIR / 'diary.html').exists(),
         'css_file': (STATIC_DIR / 'css' / 'style-v2.css').exists(),
     }
     all_ok = all(checks.values())
@@ -348,8 +393,8 @@ if __name__ == '__main__':
     # 启动自检
     validate_startup()
     
-    logger.info(f"🚀 启动通知系统 on 0.0.0.0:5001")
-    logger.info(f"工作目录：{NOTIFY_DIR}")
+    logger.info(f"🚀 启动展示系统 on 0.0.0.0:5001")
+    logger.info(f"工作目录：{DISPLAY_DIR}")
     logger.info(f"模板目录：{TEMPLATES_DIR}")
     logger.info(f"静态资源：{STATIC_DIR}")
     logger.info(f"文档目录：{DOCS_DIR}")

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>展示系统 - 日记系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style-v2.css') }}">
+    <style>
+        .diary-entry {
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #667eea;
+        }
+        .diary-date {
+            color: #667eea;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        .diary-content {
+            color: rgba(255,255,255,0.8);
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+        .diary-link {
+            display: inline-block;
+            margin-top: 1rem;
+            color: #667eea;
+            text-decoration: none;
+        }
+        .diary-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📔 日记系统</h1>
+            <p>展示系统 - 每日成长记录</p>
+        </header>
+        
+        <nav class="breadcrumb">
+            <a href="/">🏠 系统状态</a> &gt; <span>📔 日记系统</span>
+        </nav>
+        
+        <div class="card">
+            <h2>📅 最近日记</h2>
+            <div id="diary-container">
+                <div class="loading"><div class="spinner"></div><p>加载日记...</p></div>
+            </div>
+        </div>
+        
+        <div class="card" style="margin-top: 1rem;">
+            <h2>🔗 访问完整日记系统</h2>
+            <p style="color: rgba(255,255,255,0.7); margin-top: 0.5rem;">
+                查看完整的日记系统，请访问：<br>
+                <a href="https://diary.galaxystream.online" target="_blank" class="diary-link">
+                    https://diary.galaxystream.online ↗
+                </a>
+            </p>
+        </div>
+        
+        <footer style="text-align: center; color: rgba(255,255,255,0.5); padding: 1rem; margin-top: 2rem;">
+            <p id="last-updated">最后更新：--</p>
+        </footer>
+        
+        <button class="refresh-btn" onclick="loadDiary()" title="刷新">🔄</button>
+    </div>
+    
+    <script>
+        async function loadDiary() {
+            const container = document.getElementById('diary-container');
+            const lastUpdated = document.getElementById('last-updated');
+            
+            try {
+                const response = await fetch('/api/diary');
+                const entries = await response.json();
+                
+                if (entries.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <h2>📭 暂无日记</h2>
+                            <p>每日日记会显示在这里</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let html = '';
+                entries.forEach(entry => {
+                    html += `
+                        <div class="diary-entry">
+                            <div class="diary-date">📅 ${entry.date}</div>
+                            <div class="diary-content">${entry.content}</div>
+                        </div>
+                    `;
+                });
+                
+                container.innerHTML = html;
+                lastUpdated.textContent = `最后更新：${new Date().toLocaleString('zh-CN')}`;
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="error-state">
+                        <h2>❌ 加载失败</h2>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', loadDiary);
+    </script>
+</body>
+</html>
