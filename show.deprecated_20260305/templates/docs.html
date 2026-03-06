@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Show Galaxy - 文档中心</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📄 文档中心</h1>
+            <p>Show Galaxy - 子代理文档与系统记录</p>
+        </header>
+        
+        <nav class="breadcrumb">
+            <a href="/">🏠 系统状态</a> &gt; <span>📄 文档中心</span>
+        </nav>
+        
+        <div id="docs-container">
+            <div class="loading"><div class="spinner"></div><p>加载文档索引...</p></div>
+        </div>
+        
+        <footer style="text-align: center; color: rgba(255,255,255,0.5); padding: 1rem; margin-top: 2rem;">
+            <p id="last-updated">最后更新：--</p>
+        </footer>
+        
+        <button class="refresh-btn" onclick="loadDocs()" title="刷新">🔄</button>
+    </div>
+    
+    <script>
+        async function loadDocs() {
+            const container = document.getElementById('docs-container');
+            const lastUpdated = document.getElementById('last-updated');
+            
+            try {
+                const response = await fetch('/api/docs');
+                const docs = await response.json();
+                
+                if (docs.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <h2>📭 暂无文档</h2>
+                            <p>子代理的文档会显示在这里</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let html = '';
+                docs.forEach(category => {
+                    html += `
+                        <div class="card">
+                            <h2>📁 ${category.category_title}</h2>
+                            <div class="docs-list">
+                    `;
+                    
+                    category.docs.forEach(doc => {
+                        const tags = doc.tags ? `<span class="tags">${doc.tags}</span>` : '';
+                        const creator = doc.creator ? `<span class="meta">👤 ${doc.creator}</span>` : '';
+                        const createdAt = doc.created_at ? `<span class="meta">📅 ${doc.created_at}</span>` : '';
+                        
+                        html += `
+                            <div class="doc-item">
+                                <div class="doc-header">
+                                    <h3>📄 ${doc.title}</h3>
+                                    <span class="doc-updated">🕐 ${doc.updated_at}</span>
+                                </div>
+                                <div class="doc-meta">
+                                    ${creator}
+                                    ${createdAt}
+                                    ${tags}
+                                </div>
+                                <div class="doc-path">📂 /docs/${category.category}/${doc.name}.md</div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                container.innerHTML = html;
+                lastUpdated.textContent = `最后更新：${new Date().toLocaleString('zh-CN')}`;
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="error-state">
+                        <h2>❌ 加载失败</h2>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // 页面加载时获取文档
+        document.addEventListener('DOMContentLoaded', loadDocs);
+    </script>
+</body>
+</html>

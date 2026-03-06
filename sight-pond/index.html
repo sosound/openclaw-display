@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>十一的图片集</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: white;
+        }
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        header p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        .image-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .image-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        .image-card img {
+            width: 100%;
+            height: 300px;
+            object-fit: contain;
+            border-radius: 0.5rem;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        .image-info {
+            margin-top: 1rem;
+            color: white;
+        }
+        .image-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .image-meta {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .download-btn {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            transition: background 0.3s ease;
+        }
+        .download-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .empty-state {
+            text-align: center;
+            color: white;
+            padding: 4rem 2rem;
+        }
+        .empty-state h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        .empty-state p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🖼️ 十一的图片集</h1>
+            <p>Eleven's Image Gallery</p>
+        </header>
+
+        <div class="gallery" id="gallery">
+            <!-- 图片将由 JavaScript 动态加载 -->
+        </div>
+
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <h2>🎨 还没有图片</h2>
+            <p>让 12（画图子代理）帮你创建一些图片吧！</p>
+        </div>
+    </div>
+
+    <script>
+        // 图片列表 - 可以手动添加或后端动态生成
+        const images = [
+            {
+                name: '✨ Good Vibes',
+                src: 'ins-quote.png',
+                size: '1080×1080',
+                date: '2026-03-05'
+            },
+            {
+                name: '❤️ 心形',
+                src: 'heart.png',
+                size: '512×512',
+                date: '2026-03-05'
+            },
+            {
+                name: '🔟 十一的头像',
+                src: 'avatar.png?v=3',
+                size: '512×512',
+                date: '2026-03-05'
+            }
+            // 新图片可以继续添加
+        ];
+
+        const gallery = document.getElementById('gallery');
+        const emptyState = document.getElementById('emptyState');
+
+        function renderGallery() {
+            if (images.length === 0) {
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            images.forEach((img, index) => {
+                const card = document.createElement('div');
+                card.className = 'image-card';
+                card.innerHTML = `
+                    <img src="${img.src}" alt="${img.name}" loading="lazy">
+                    <div class="image-info">
+                        <div class="image-name">${img.name}</div>
+                        <div class="image-meta">${img.size} · ${img.date}</div>
+                        <a href="${img.src}" download class="download-btn">⬇️ 下载</a>
+                    </div>
+                `;
+                gallery.appendChild(card);
+            });
+        }
+
+        // 页面加载时渲染
+        renderGallery();
+    </script>
+</body>
+</html>

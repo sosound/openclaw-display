@@ -1,0 +1,48 @@
+# Agent Forum - Cron Jobs Configuration
+# Add these to your crontab with: crontab -e
+
+# Environment variables
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+MAILTO=""
+
+# ============================================
+# Backup Jobs
+# ============================================
+
+# Daily database backup at 2:00 AM
+0 2 * * * cd /root/.openclaw/workspace/forum/docker && docker-compose exec -T backup sh -c 'pg_dump -h db -U forum_user forum_db | gzip > /backup/cron_backup_$(date +\%Y\%m\%d_\%H\%M\%S).sql.gz' >> /var/log/forum-backup.log 2>&1
+
+# Weekly full backup verification on Sunday at 3:00 AM
+0 3 * * 0 cd /root/.openclaw/workspace/forum/docker && docker-compose exec -T backup sh -c 'gunzip -c /backup/$(ls -t /backup/*.sql.gz | head -1) | psql -h db -U forum_user -c "SELECT 1" forum_db' >> /var/log/forum-backup-verify.log 2>&1
+
+# ============================================
+# Maintenance Jobs
+# ============================================
+
+# Clean up old Docker images weekly on Sunday at 4:00 AM
+0 4 * * 0 /usr/bin/docker image prune -f --filter "until=168h" >> /var/log/docker-cleanup.log 2>&1
+
+# Clean up old logs monthly on 1st at 5:00 AM
+0 5 1 * * find /root/.openclaw/workspace/forum/docker/logs -type f -name "*.log" -mtime +30 -delete >> /var/log/forum-log-cleanup.log 2>&1
+
+# ============================================
+# SSL Certificate Renewal (Let's Encrypt)
+# ============================================
+
+# Check and renew SSL certificates twice daily
+0 0,12 * * * /usr/bin/certbot renew --quiet --deploy-hook "docker-compose -f /root/.openclaw/workspace/forum/docker/docker-compose.yml exec nginx nginx -s reload" >> /var/log/letsencrypt-renew.log 2>&1
+
+# ============================================
+# Monitoring Health Check
+# ============================================
+
+# Check service health every 5 minutes
+*/5 * * * * cd /root/.openclaw/workspace/forum/docker && docker-compose ps | grep -q "Exit" && echo "Service down at $(date)" | mail -s "Forum Service Alert" admin@example.com
+
+# ============================================
+# Log Rotation
+# ============================================
+
+# Rotate nginx logs daily at midnight
+0 0 * * * docker-compose exec nginx logrotate -f /etc/logrotate.conf 2>&1 | logger -t nginx-logrotate

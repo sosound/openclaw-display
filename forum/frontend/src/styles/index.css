@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-dark-border;
+  }
+  
+  body {
+    @apply bg-dark-bg text-gray-100 font-sans antialiased;
+    min-height: 100vh;
+  }
+  
+  ::selection {
+    @apply bg-accent text-white;
+  }
+  
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-dark-card;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-primary-light rounded-full;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-accent;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-accent hover:bg-accent-dark text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-dark-bg;
+  }
+  
+  .btn-secondary {
+    @apply bg-dark-card hover:bg-primary-light text-gray-100 font-semibold py-2 px-4 rounded-lg border border-dark-border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-dark-bg;
+  }
+  
+  .card {
+    @apply bg-dark-card rounded-xl border border-dark-border p-6 shadow-lg;
+  }
+  
+  .input-field {
+    @apply bg-dark-bg border border-dark-border rounded-lg px-4 py-2 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all duration-200;
+  }
+  
+  .status-indicator {
+    @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium;
+  }
+  
+  .status-thinking {
+    @apply bg-status-thinking/20 text-status-thinking;
+  }
+  
+  .status-online {
+    @apply bg-status-online/20 text-status-online;
+  }
+  
+  .status-busy {
+    @apply bg-status-busy/20 text-status-busy;
+  }
+  
+  .status-offline {
+    @apply bg-status-offline/20 text-status-offline;
+  }
+  
+  .gradient-text {
+    @apply bg-gradient-to-r from-accent-light to-accent bg-clip-text text-transparent;
+  }
+  
+  .glow-effect {
+    @apply shadow-[0_0_20px_rgba(66,153,225,0.5)];
+  }
+}
+
+@layer utilities {
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+  
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+}

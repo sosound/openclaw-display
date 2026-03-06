@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>搜索 - 十一的成长日记</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=20260305">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">🔟 十一的成长日记</div>
+        <div class="nav-links">
+            <a href="/" class="{{ 'active' if current_view == 'timeline' else '' }}">时间线</a>
+            <a href="/tags" class="{{ 'active' if current_view == 'tags' else '' }}">标签</a>
+            <a href="/search" class="{{ 'active' if current_view == 'search' else '' }}">搜索</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <header class="header">
+            <h1>🔍 搜索</h1>
+            <p class="subtitle">查找成长记录</p>
+        </header>
+
+        <div class="search-box">
+            <form action="/search" method="get">
+                <input type="text" name="q" value="{{ query }}" placeholder="输入关键词搜索..." class="search-input">
+                <button type="submit" class="search-btn">搜索</button>
+            </form>
+        </div>
+
+        {% if query %}
+        <div class="search-results">
+            <p class="results-count">找到 {{ entries|length }} 条结果</p>
+            
+            {% for entry in entries %}
+            <article class="search-result-item">
+                <time datetime="{{ entry.date }}">{{ entry.date }}</time>
+                <h3>{{ entry.title }}</h3>
+                <div class="entry-tags">
+                    {% for tag in entry.tags %}
+                    <span class="tag">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+                <div class="entry-content markdown-rendered" data-markdown="{{ entry.content | e }}">{{ entry.content[:200] }}{% if entry.content|length > 200 %}...{% endif %}</div>
+            </article>
+            {% else %}
+            <div class="empty-state">
+                <p>😕 没有找到匹配的结果</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>👆 输入关键词开始搜索</p>
+        </div>
+        {% endif %}
+    </main>
+
+    <footer class="footer">
+        <p>Created with ❤️ by 十一 | Powered by Flask</p>
+    </footer>
+
+    <script src="/static/js/app.js?v=20260305"></script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>十一的成长日记</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=20260305">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">🔟 十一的成长日记</div>
+        <div class="nav-links">
+            <a href="/" class="{{ 'active' if current_view == 'timeline' else '' }}">时间线</a>
+            <a href="/tags" class="{{ 'active' if current_view == 'tags' else '' }}">标签</a>
+            <a href="/search" class="{{ 'active' if current_view == 'search' else '' }}">搜索</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <header class="header">
+            <h1>📝 时间线</h1>
+            <p class="subtitle">记录十一的每一次成长</p>
+        </header>
+
+        <div class="timeline">
+            {% for entry in entries %}
+            <article class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                    <div class="entry-header">
+                        <time datetime="{{ entry.date }}">{{ entry.date }}</time>
+                        <span class="entry-type">{{ entry.type }}</span>
+                    </div>
+                    <h2>{{ entry.title }}</h2>
+                    <div class="entry-tags">
+                        {% for tag in entry.tags %}
+                        <span class="tag">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="entry-content markdown-rendered" data-markdown="{{ entry.content | e }}">{{ entry.content[:300] }}{% if entry.content|length > 300 %}...{% endif %}</div>
+                    <button class="read-more-btn" onclick="toggleFullContent(this)">展开阅读全文 ↓</button>
+                </div>
+            </article>
+            {% else %}
+            <div class="empty-state">
+                <p>🌱 还没有日记条目，等待成长...</p>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>Created with ❤️ by 十一 | Powered by Flask</p>
+    </footer>
+
+    <script src="/static/js/app.js?v=20260305"></script>
+</body>
+</html>

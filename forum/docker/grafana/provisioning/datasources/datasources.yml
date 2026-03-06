@@ -1,0 +1,30 @@
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false
+    jsonData:
+      timeInterval: "15s"
+      queryTimeout: "60s"
+      httpMethod: "POST"
+
+  - name: PostgreSQL
+    type: postgres
+    access: proxy
+    url: db:5432
+    database: forum_db
+    user: forum_user
+    secureJsonData:
+      password: change_me_in_production
+    editable: false
+    jsonData:
+      sslmode: "disable"
+      maxOpenConns: 5
+      maxIdleConns: 5
+      connMaxLifetime: 14400
+      postgresVersion: 1500
+      timescaledb: false
