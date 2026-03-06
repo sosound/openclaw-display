@@ -465,7 +465,8 @@ MODELS = [
 DOMAINS = [
     {"domain": "galaxystream.online", "type": "主域名", "enabled": True, "config": "SSL 证书"},
     {"domain": "diary.galaxystream.online", "type": "子域名", "enabled": True, "config": "成长日记 (Flask)"},
-    {"domain": "display.galaxystream.online", "type": "子域名", "enabled": True, "config": "展示系统 (Flask)"},
+    {"domain": "display.galaxystream.online", "type": "子域名", "enabled": True, "config": "展示系统 (Flask) - 文档 + 状态 + 日记集成"},
+    {"domain": "show.galaxystream.online", "type": "子域名", "enabled": True, "config": "展示系统 (同 display，已更名)"},
     {"domain": "gateway.galaxystream.online", "type": "子域名", "enabled": False, "config": "已停用 (安全回退)"},
 ]
 
