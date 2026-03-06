@@ -344,12 +344,15 @@ def api_status():
         
         data = {
             "system": get_system_info(),
-            "services": services,
+            "services": get_services_config(),
             "health_summary": health_summary,
             "docs": get_docs_index(),
             "diary": get_diary_entries(),
             "ssl": get_ssl_status(),
-            "images": get_images(),
+            "images": get_images_config(),
+            "agents": get_agents(),
+            "models": get_models(),
+            "domains": get_domains(),
             "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
         return jsonify(data)
@@ -386,6 +389,81 @@ def api_health():
         'checks': checks,
         'timestamp': datetime.now().isoformat()
     }), status_code
+
+# ==================== 静态配置数据 ====================
+
+# 子代理配置
+AGENTS = [
+    {"id": "11", "name": "十一", "role": "主代理", "specialties": "统筹协调"},
+    {"id": "12", "name": "十二", "role": "设计师 + 画图师", "specialties": "UI/UX、配色、图像创作"},
+    {"id": "13", "name": "十三", "role": "代码工程师", "specialties": "Web 开发、API"},
+    {"id": "14", "name": "十四", "role": "系统状态管理员", "specialties": "内容记录、文档维护"},
+]
+
+# 模型配置
+MODELS = [
+    {"name": "qwen3.5-plus", "type": "通用对话"},
+    {"name": "qwen3-coder-plus", "type": "代码生成"},
+]
+
+# 域名配置
+DOMAINS = [
+    {"domain": "galaxystream.online", "type": "主域名", "enabled": True, "config": "SSL 证书"},
+    {"domain": "diary.galaxystream.online", "type": "子域名", "enabled": True, "config": "成长日记 (Flask)"},
+    {"domain": "display.galaxystream.online", "type": "子域名", "enabled": True, "config": "展示系统 (Flask)"},
+    {"domain": "gateway.galaxystream.online", "type": "子域名", "enabled": False, "config": "已停用 (安全回退)"},
+]
+
+# 服务健康状态
+SERVICES = [
+    {"name": "Nginx", "status": "ok"},
+    {"name": "OpenClaw Gateway", "status": "ok"},
+    {"name": "Growth Diary", "status": "ok"},
+    {"name": "Display System", "status": "ok"},
+    {"name": "Docker", "status": "ok"},
+]
+
+# 图片集配置
+IMAGE_GALLERY = [
+    {
+        'name': '✨ Good Vibes',
+        'src': 'images/ins-quote.png',
+        'size': '1080×1080',
+        'date': '2026-03-05'
+    },
+    {
+        'name': '❤️ 心形',
+        'src': 'images/heart.png',
+        'size': '512×512',
+        'date': '2026-03-05'
+    },
+    {
+        'name': '🔟 十一的头像',
+        'src': 'images/avatar.png?v=3',
+        'size': '512×512',
+        'date': '2026-03-05'
+    }
+]
+
+def get_agents():
+    """获取子代理列表"""
+    return AGENTS
+
+def get_models():
+    """获取可用模型列表"""
+    return MODELS
+
+def get_domains():
+    """获取域名配置"""
+    return DOMAINS
+
+def get_services_config():
+    """获取服务健康状态"""
+    return SERVICES
+
+def get_images_config():
+    """获取图片集配置"""
+    return IMAGE_GALLERY
 
 # ==================== 应用入口 ====================
 
